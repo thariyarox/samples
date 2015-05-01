@@ -28,12 +28,16 @@ public class CustomUserStoreConstants {
     public static final ArrayList<Property> CUSTOM_UM_OPTIONAL_PROPERTIES = new ArrayList<Property>();
     public static final ArrayList<Property> CUSTOM_UM_ADVANCED_PROPERTIES = new ArrayList<Property>();
 
-    //Properties for DB Access
+    //DB Access Constants
     public static final String UPDATE_USERNAME_SQL_STATEMENT = "UPDATE UM_USER SET UM_USER_NAME= ? WHERE UM_USER_NAME= ? AND UM_TENANT_ID=?";
 
     //Properties for Claims
     public static final String USERNAME_RENAME_CLAIM = "UserNameRenameClaim";
     public static final String NEW_USERNAME_DEFAULT_CLAIM_URI = "http://wso2.org/claims/username";
+
+    //Error Code Constants
+    public static final int USERNAME_ALREADY_EXISTING_ERROR_CODE = 15300; //Change the error code according to the requirement
+
 
     static {
 

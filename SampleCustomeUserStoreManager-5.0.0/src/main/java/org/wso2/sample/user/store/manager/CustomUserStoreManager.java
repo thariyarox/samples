@@ -63,17 +63,20 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
             if(!isExistingUser(newUserName)) {
                 updateUsername(userName, newUserName, tenantId);
 
-                // TODO : Perform cache operations here
-
                 // Make new username as the current username
                 userName = newUserName;
 
                 // Remove the new username claim as username is already updated
                 claims.remove(userNameRenameClaimUri);
             } else {
-                throw new UserStoreException(
-                        "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
-                        " is already existing");
+
+                String errorMessage = "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
+                                      " is already existing";
+
+                UserStoreException exception = new CustomUserStoreManagerException(
+                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE);
+
+                throw exception;
             }
         }
 
@@ -91,18 +94,17 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
 
         Properties defaultUserStoreProperties = super.getDefaultUserStoreProperties();
 
+        Property[] mandatoryProperties = concat(CustomUserStoreConstants.CUSTOM_UM_MANDATORY_PROPERTIES.toArray(
+                new Property[CustomUserStoreConstants.CUSTOM_UM_MANDATORY_PROPERTIES.size()]),
+                                                defaultUserStoreProperties.getMandatoryProperties());
+        Property[] optionalProperties = concat(CustomUserStoreConstants.CUSTOM_UM_OPTIONAL_PROPERTIES.toArray
+                (new Property[CustomUserStoreConstants.CUSTOM_UM_OPTIONAL_PROPERTIES.size()]),
+                                               defaultUserStoreProperties.getOptionalProperties());
+        Property[] advancedProperties = concat(CustomUserStoreConstants.CUSTOM_UM_ADVANCED_PROPERTIES.toArray
+                (new Property[CustomUserStoreConstants.CUSTOM_UM_ADVANCED_PROPERTIES.size()]),
+                                               defaultUserStoreProperties.getAdvancedProperties());
 
         Properties properties = new Properties();
-
-
-
-        Property [] mandatoryProperties = concat(CustomUserStoreConstants.CUSTOM_UM_MANDATORY_PROPERTIES.toArray(new Property[CustomUserStoreConstants.CUSTOM_UM_MANDATORY_PROPERTIES.size()]), defaultUserStoreProperties.getMandatoryProperties());
-        Property [] optionalProperties = concat(CustomUserStoreConstants.CUSTOM_UM_OPTIONAL_PROPERTIES.toArray
-                (new Property[CustomUserStoreConstants.CUSTOM_UM_OPTIONAL_PROPERTIES.size()]), defaultUserStoreProperties.getOptionalProperties());
-        Property [] advancedProperties = concat(CustomUserStoreConstants.CUSTOM_UM_ADVANCED_PROPERTIES.toArray
-                (new Property[CustomUserStoreConstants.CUSTOM_UM_ADVANCED_PROPERTIES.size()]), defaultUserStoreProperties.getAdvancedProperties());
-
-
         properties.setMandatoryProperties(mandatoryProperties);
         properties.setOptionalProperties(optionalProperties);
         properties.setAdvancedProperties(advancedProperties);
