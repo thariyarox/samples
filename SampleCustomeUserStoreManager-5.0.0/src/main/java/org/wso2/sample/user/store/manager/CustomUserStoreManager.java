@@ -1,7 +1,9 @@
 package org.wso2.sample.user.store.manager;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.api.Properties;
 import org.wso2.carbon.user.api.Property;
 import org.wso2.carbon.user.core.UserRealm;
@@ -45,9 +47,62 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
 
     }
 
-    @Override public Map<String, String> getUserPropertyValues(String userName, String[] propertyNames,
-                                                               String profileName) throws UserStoreException {
-        return super.getUserPropertyValues(userName, propertyNames, profileName);
+    @Override public void doSetUserClaimValue(String userName, String claimURI, String claimValue, String profileName)
+            throws UserStoreException {
+
+        if (userNameRenameClaimUri.equals(claimURI)) {
+
+            if(log.isDebugEnabled()){
+                log.debug("Trying to rename user " + userName + " to " + claimValue);
+            }
+            Boolean isUserNameAdminUser = false;
+            try {
+                if(CarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName().equals(userName)){
+                    isUserNameAdminUser = true;
+                    String errorMessage = "Admin user cannot be renamed";
+                    log.error(errorMessage);
+                    throw new CustomUserStoreManagerException(
+                            CustomUserStoreConstants.ADMIN_USERNAME_RENAME_ERROR_CODE, errorMessage);
+                }
+            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+
+                if(isUserNameAdminUser) {
+                    throw (UserStoreException) e;
+                } else {
+                    String errorMessage = "Error while trying to retrieve Admin username when renaming username";
+                    log.error(errorMessage);
+                    throw new CustomUserStoreManagerException(CustomUserStoreConstants.ADMIN_USERNAME_RETRIEVE_ERROR, errorMessage);
+                }
+            }
+
+            // Handle with special flow
+
+            String newUserName = claimValue;
+
+            // Check if new username is already existing
+            if(!isExistingUser(newUserName)) {
+                updateUsername(userName, newUserName, tenantId);
+
+                if(log.isDebugEnabled()){
+                    log.debug("Username is successfully updated from " + userName + " to " + newUserName);
+                }
+
+                // Make new username as the current username
+                userName = newUserName;
+
+            } else {
+
+                String errorMessage = "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
+                                      " is already existing";
+
+                log.error(errorMessage);
+
+                throw new CustomUserStoreManagerException(
+                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
+            }
+
+        }
+        super.doSetUserClaimValue(userName, claimURI, claimValue, profileName);
     }
 
     @Override public void doSetUserClaimValues(String userName, Map<String, String> claims, String profileName)
@@ -59,9 +114,37 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
 
             String newUserName = claims.get(userNameRenameClaimUri);
 
+            if(log.isDebugEnabled()){
+                log.debug("Trying to rename user " + userName + " to " + newUserName);
+            }
+
+            Boolean isUserNameAdminUser = false;
+            try {
+                if(CarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName().equals(userName)){
+                    isUserNameAdminUser = true;
+                    String errorMessage = "Admin username cannot be renamed";
+                    log.error(errorMessage);
+                    throw new CustomUserStoreManagerException(
+                            CustomUserStoreConstants.ADMIN_USERNAME_RENAME_ERROR_CODE, errorMessage);
+                }
+            } catch (org.wso2.carbon.user.api.UserStoreException e) {
+
+                if(isUserNameAdminUser) {
+                    throw (UserStoreException) e;
+                } else {
+                    String errorMessage = "Error while trying to retrieve Admin username when renaming username";
+                    log.error(errorMessage);
+                    throw new CustomUserStoreManagerException(CustomUserStoreConstants.ADMIN_USERNAME_RETRIEVE_ERROR, errorMessage);
+                }
+            }
+
             // Check if new username is already existing
             if(!isExistingUser(newUserName)) {
                 updateUsername(userName, newUserName, tenantId);
+
+                if(log.isDebugEnabled()){
+                    log.debug("Username is successfully updated from " + userName + " to " + newUserName);
+                }
 
                 // Make new username as the current username
                 userName = newUserName;
@@ -73,20 +156,14 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
                 String errorMessage = "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
                                       " is already existing";
 
-                UserStoreException exception = new CustomUserStoreManagerException(
-                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE);
+                log.error(errorMessage);
 
-                throw exception;
+                throw new CustomUserStoreManagerException(
+                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
             }
         }
-
         super.doSetUserClaimValues(userName, claims, profileName);
 
-    }
-
-    @Override protected String getClaimAtrribute(String claimURI, String identifier, String domainName)
-            throws org.wso2.carbon.user.api.UserStoreException {
-        return super.getClaimAtrribute(claimURI, identifier, domainName);
     }
 
     @Override
@@ -112,6 +189,10 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
     }
 
     private void updateUsername(String userName, String newUserName, int tenantId) throws UserStoreException {
+
+        if(log.isDebugEnabled()){
+            log.debug("Trying to rename the user " + userName + " to " + newUserName + " in the database");
+        }
 
         Connection dbConnection = null;
         try {

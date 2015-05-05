@@ -15,6 +15,11 @@ public class CustomUserStoreManagerException extends UserStoreException {
         this.errorCode = errorCode;
     }
 
+    public CustomUserStoreManagerException(int errorCode, String message){
+        super(message);
+        this.errorCode = errorCode;
+    }
+
     public int getErrorCode() {
         return errorCode;
     }

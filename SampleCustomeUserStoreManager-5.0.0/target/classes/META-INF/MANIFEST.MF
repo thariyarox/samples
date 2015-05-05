@@ -2,7 +2,8 @@ Manifest-Version: 1.0
 Export-Package: org.wso2.sample.user.store.manager;uses:="org.wso2.car
  bon.user.core.claim,org.apache.commons.logging,org.wso2.carbon.user.a
  pi,org.wso2.carbon.user.core.jdbc,org.wso2.carbon.user.core.profile,o
- rg.wso2.carbon.user.core.util,org.wso2.carbon.user.core"
+ rg.wso2.carbon.user.core.util,org.wso2.carbon.user.core,org.wso2.carb
+ on.context"
 Service-Component: OSGI-INF/serviceComponents.xml
 Private-Package: org.wso2.sample.user.store.manager.internal
 Ignore-Package: org.wso2.sample.user.store.manager.internal
@@ -13,17 +14,18 @@ Created-By: Apache Maven Bundle Plugin
 DynamicImport-Package: *
 Build-Jdk: 1.6.0_45
 Bundle-Version: 1.0
-Bnd-LastModified: 1430507696897
+Bnd-LastModified: 1430796472786
 Bundle-ManifestVersion: 2
 Import-Package: javax.servlet;version="2.4.0",javax.servlet.http;versi
  on="2.4.0",org.apache.commons.logging;resolution:=optional;version="1
  .1",org.osgi.framework;resolution:=optional;version="1.7",org.osgi.se
- rvice.component;resolution:=optional;version="1.2",org.wso2.carbon.us
- er.api;resolution:=optional;version="1.0",org.wso2.carbon.user.core;v
- ersion="4.2",org.wso2.carbon.user.core.claim;version="4.2",org.wso2.c
- arbon.user.core.jdbc;version="4.2",org.wso2.carbon.user.core.profile;
- version="4.2",org.wso2.carbon.user.core.service;version="4.2",org.wso
- 2.carbon.user.core.util;version="4.2",org.wso2.sample.user.store.mana
- ger;resolution:=optional
+ rvice.component;resolution:=optional;version="1.2",org.wso2.carbon.co
+ ntext;resolution:=optional;version="4.2",org.wso2.carbon.user.api;res
+ olution:=optional;version="1.0",org.wso2.carbon.user.core;version="4.
+ 2",org.wso2.carbon.user.core.claim;version="4.2",org.wso2.carbon.user
+ .core.jdbc;version="4.2",org.wso2.carbon.user.core.profile;version="4
+ .2",org.wso2.carbon.user.core.service;version="4.2",org.wso2.carbon.u
+ ser.core.util;version="4.2",org.wso2.sample.user.store.manager;resolu
+ tion:=optional
 Bundle-SymbolicName: org.wso2.sample.user.store.manager
 

@@ -33,11 +33,12 @@ public class CustomUserStoreConstants {
 
     //Properties for Claims
     public static final String USERNAME_RENAME_CLAIM = "UserNameRenameClaim";
-    public static final String NEW_USERNAME_DEFAULT_CLAIM_URI = "http://wso2.org/claims/username";
+    public static final String NEW_USERNAME_DEFAULT_CLAIM_URI = "http://wso2.org/claims/userName";
 
     //Error Code Constants
     public static final int USERNAME_ALREADY_EXISTING_ERROR_CODE = 15300; //Change the error code according to the requirement
-
+    public static final int ADMIN_USERNAME_RENAME_ERROR_CODE = 15301;
+    public static final int ADMIN_USERNAME_RETRIEVE_ERROR = 15302;
 
     static {
 
