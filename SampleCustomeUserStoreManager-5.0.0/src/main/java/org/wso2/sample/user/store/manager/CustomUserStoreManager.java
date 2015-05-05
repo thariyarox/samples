@@ -1,6 +1,5 @@
 package org.wso2.sample.user.store.manager;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.CarbonContext;
@@ -55,7 +54,7 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
             if(log.isDebugEnabled()){
                 log.debug("Trying to rename user " + userName + " to " + claimValue);
             }
-            Boolean isUserNameAdminUser = false;
+            boolean isUserNameAdminUser = false;
             try {
                 if(CarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName().equals(userName)){
                     isUserNameAdminUser = true;
@@ -118,7 +117,7 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
                 log.debug("Trying to rename user " + userName + " to " + newUserName);
             }
 
-            Boolean isUserNameAdminUser = false;
+            boolean isUserNameAdminUser = false;
             try {
                 if(CarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName().equals(userName)){
                     isUserNameAdminUser = true;
