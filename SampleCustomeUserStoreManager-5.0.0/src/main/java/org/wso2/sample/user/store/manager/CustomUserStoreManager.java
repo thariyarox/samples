@@ -2,7 +2,7 @@ package org.wso2.sample.user.store.manager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.CarbonContext;
+//import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.user.api.Properties;
 import org.wso2.carbon.user.api.Property;
 import org.wso2.carbon.user.core.UserRealm;
@@ -51,57 +51,45 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
 
         if (userNameRenameClaimUri.equals(claimURI)) {
 
-            if(log.isDebugEnabled()){
-                log.debug("Trying to rename user " + userName + " to " + claimValue);
-            }
-            boolean isUserNameAdminUser = false;
-            try {
-                if(CarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName().equals(userName)){
-                    isUserNameAdminUser = true;
-                    String errorMessage = "Admin user cannot be renamed";
-                    log.error(errorMessage);
-                    throw new CustomUserStoreManagerException(
-                            CustomUserStoreConstants.ADMIN_USERNAME_RENAME_ERROR_CODE, errorMessage);
-                }
-            } catch (org.wso2.carbon.user.api.UserStoreException e) {
-
-                if(isUserNameAdminUser) {
-                    throw (UserStoreException) e;
-                } else {
-                    String errorMessage = "Error while trying to retrieve Admin username when renaming username";
-                    log.error(errorMessage);
-                    throw new CustomUserStoreManagerException(CustomUserStoreConstants.ADMIN_USERNAME_RETRIEVE_ERROR, errorMessage);
-                }
-            }
-
             // Handle with special flow
 
             String newUserName = claimValue;
 
-            // Check if new username is already existing
-            if(!isExistingUser(newUserName)) {
-                updateUsername(userName, newUserName, tenantId);
+            if (!userName.equals(newUserName)) {
 
-                if(log.isDebugEnabled()){
-                    log.debug("Username is successfully updated from " + userName + " to " + newUserName);
+                if (log.isDebugEnabled()) {
+                    log.debug("Trying to rename user " + userName + " to " + claimValue);
                 }
 
-                // Make new username as the current username
-                userName = newUserName;
+                // Check if new username is already existing
+                if (!isExistingUser(newUserName)) {
+                    updateUsername(userName, newUserName, tenantId);
 
-            } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Username is successfully updated from " + userName + " to " + newUserName);
+                    }
 
-                String errorMessage = "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
-                                      " is already existing";
+                    // Make new username as the current username
+                    userName = newUserName;
 
-                log.error(errorMessage);
+                    // Add SCIM username claim URI
+                    claimURI = CustomUserStoreConstants.SCIM_USERNAME_CLAIM;
 
-                throw new CustomUserStoreManagerException(
-                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
+                } else {
+
+                    String errorMessage =
+                            "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
+                            " is already existing";
+
+                    log.error(errorMessage);
+
+                    throw new CustomUserStoreManagerException(
+                            CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
+                }
             }
 
+            super.doSetUserClaimValue(userName, claimURI, claimValue, profileName);
         }
-        super.doSetUserClaimValue(userName, claimURI, claimValue, profileName);
     }
 
     @Override public void doSetUserClaimValues(String userName, Map<String, String> claims, String profileName)
@@ -113,52 +101,39 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
 
             String newUserName = claims.get(userNameRenameClaimUri);
 
-            if(log.isDebugEnabled()){
-                log.debug("Trying to rename user " + userName + " to " + newUserName);
-            }
-
-            boolean isUserNameAdminUser = false;
-            try {
-                if(CarbonContext.getThreadLocalCarbonContext().getUserRealm().getRealmConfiguration().getAdminUserName().equals(userName)){
-                    isUserNameAdminUser = true;
-                    String errorMessage = "Admin username cannot be renamed";
-                    log.error(errorMessage);
-                    throw new CustomUserStoreManagerException(
-                            CustomUserStoreConstants.ADMIN_USERNAME_RENAME_ERROR_CODE, errorMessage);
+            if (!userName.equals(newUserName)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Trying to rename user " + userName + " to " + newUserName);
                 }
-            } catch (org.wso2.carbon.user.api.UserStoreException e) {
 
-                if(isUserNameAdminUser) {
-                    throw (UserStoreException) e;
+                // Check if new username is already existing
+                if (!isExistingUser(newUserName)) {
+                    updateUsername(userName, newUserName, tenantId);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("Username is successfully updated from " + userName + " to " + newUserName);
+                    }
+
+                    // Make new username as the current username
+                    userName = newUserName;
+
+                    // Remove the userName claim since remaing is already done
+                    claims.remove(userNameRenameClaimUri);
+
+                    // Add SCIM username claim
+                    claims.put(CustomUserStoreConstants.SCIM_USERNAME_CLAIM, newUserName);
+
                 } else {
-                    String errorMessage = "Error while trying to retrieve Admin username when renaming username";
+
+                    String errorMessage =
+                            "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
+                            " is already existing";
+
                     log.error(errorMessage);
-                    throw new CustomUserStoreManagerException(CustomUserStoreConstants.ADMIN_USERNAME_RETRIEVE_ERROR, errorMessage);
+
+                    throw new CustomUserStoreManagerException(
+                            CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
                 }
-            }
-
-            // Check if new username is already existing
-            if(!isExistingUser(newUserName)) {
-                updateUsername(userName, newUserName, tenantId);
-
-                if(log.isDebugEnabled()){
-                    log.debug("Username is successfully updated from " + userName + " to " + newUserName);
-                }
-
-                // Make new username as the current username
-                userName = newUserName;
-
-                // Remove the new username claim as username is already updated
-                claims.remove(userNameRenameClaimUri);
-            } else {
-
-                String errorMessage = "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
-                                      " is already existing";
-
-                log.error(errorMessage);
-
-                throw new CustomUserStoreManagerException(
-                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
             }
         }
         super.doSetUserClaimValues(userName, claims, profileName);
