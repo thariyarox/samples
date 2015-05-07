@@ -3,6 +3,5 @@
     <scr:component enabled="true" immediate="true" name="custom.user.store.manager.dscomponent">
         <implementation class="org.wso2.sample.user.store.manager.internal.CustomUserStoreMgtDSComponent"/>
         <property name="service.pid" value="custom.user.store.manager.dscomponent" private="false"/>
-        <reference name="user.realmservice.default" interface="org.wso2.carbon.user.core.service.RealmService" cardinality="1..1" policy="dynamic" bind="setRealmService" unbind="unsetRealmService" checked="true"/>
     </scr:component>
 </components>

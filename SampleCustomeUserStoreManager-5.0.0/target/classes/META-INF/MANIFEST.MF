@@ -13,7 +13,7 @@ Created-By: Apache Maven Bundle Plugin
 DynamicImport-Package: *
 Build-Jdk: 1.6.0_45
 Bundle-Version: 1.0
-Bnd-LastModified: 1430833882673
+Bnd-LastModified: 1431002021597
 Bundle-ManifestVersion: 2
 Import-Package: javax.servlet;version="2.4.0",javax.servlet.http;versi
  on="2.4.0",org.apache.commons.logging;resolution:=optional;version="1
@@ -22,8 +22,7 @@ Import-Package: javax.servlet;version="2.4.0",javax.servlet.http;versi
  er.api;resolution:=optional;version="1.0",org.wso2.carbon.user.core;v
  ersion="4.2",org.wso2.carbon.user.core.claim;version="4.2",org.wso2.c
  arbon.user.core.jdbc;version="4.2",org.wso2.carbon.user.core.profile;
- version="4.2",org.wso2.carbon.user.core.service;version="4.2",org.wso
- 2.carbon.user.core.util;version="4.2",org.wso2.sample.user.store.mana
- ger;resolution:=optional
+ version="4.2",org.wso2.carbon.user.core.util;version="4.2",org.wso2.s
+ ample.user.store.manager;resolution:=optional
 Bundle-SymbolicName: org.wso2.sample.user.store.manager
 
