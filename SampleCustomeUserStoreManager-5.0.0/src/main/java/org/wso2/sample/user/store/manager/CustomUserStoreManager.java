@@ -114,10 +114,11 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
                         // Remove the userName claim since remaing is already done
                         claims.remove(userNameRenameClaimUri);
 
-                        if (claims.size() > 0) {
-                            // Update other claims
-                            super.doSetUserClaimValues(userName, claims, profileName);
-                        }
+                        // Add new username for SCIM username
+                        claims.put(CustomUserStoreConstants.SCIM_USERNAME_CLAIM, newUserName);
+
+                        // Update other claims
+                        super.doSetUserClaimValues(userName, claims, profileName);
 
                         //updateUsername(userName, newUserName, tenantId);
                         doSetUserClaimValue(userName, userNameRenameClaimUri, newUserName, profileName);
