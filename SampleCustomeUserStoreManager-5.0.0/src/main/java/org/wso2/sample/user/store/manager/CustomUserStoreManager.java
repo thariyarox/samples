@@ -97,51 +97,48 @@ public class CustomUserStoreManager extends JDBCUserStoreManager {
     @Override public void doSetUserClaimValues(String userName, Map<String, String> claims, String profileName)
             throws UserStoreException {
 
-            if (claims.containsKey(userNameRenameClaimUri) && !claims.get(userNameRenameClaimUri).isEmpty()) {
+        String newUserName = claims.get(userNameRenameClaimUri);
+        claims.remove(userNameRenameClaimUri);
 
-                // Handle with special flow
+        if (newUserName != null && !newUserName.isEmpty() && !newUserName.equals(userName)) {
+            // Handle with special flow
 
-                String newUserName = claims.get(userNameRenameClaimUri);
+            if (log.isDebugEnabled()) {
+                log.debug("Trying to rename user " + userName + " to " + newUserName);
+            }
 
-                if (!userName.equals(newUserName)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Trying to rename user " + userName + " to " + newUserName);
-                    }
+            // Check if new username is already existing
+            if (!isExistingUser(newUserName)) {
 
-                    // Check if new username is already existing
-                    if (!isExistingUser(newUserName)) {
+                // Remove the userName claim since remaining is already done
 
-                        // Remove the userName claim since remaing is already done
-                        claims.remove(userNameRenameClaimUri);
+                // Add new username for SCIM username
+                claims.put(CustomUserStoreConstants.SCIM_USERNAME_CLAIM, newUserName);
 
-                        // Add new username for SCIM username
-                        claims.put(CustomUserStoreConstants.SCIM_USERNAME_CLAIM, newUserName);
+                // Update other claims
+                super.doSetUserClaimValues(userName, claims, profileName);
 
-                        // Update other claims
-                        super.doSetUserClaimValues(userName, claims, profileName);
-
-                        //updateUsername(userName, newUserName, tenantId);
-                        doSetUserClaimValue(userName, userNameRenameClaimUri, newUserName, profileName);
+                //updateUsername(userName, newUserName, tenantId);
+                doSetUserClaimValue(userName, userNameRenameClaimUri, newUserName, profileName);
 
 
-                        if (log.isDebugEnabled()) {
-                            log.debug("Username is successfully updated from " + userName + " to " + newUserName);
-                        }
-                    } else {
-
-                        String errorMessage =
-                                "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
-                                " is already existing";
-
-                        log.error(errorMessage);
-
-                        throw new CustomUserStoreManagerException(
-                                CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
-                    }
+                if (log.isDebugEnabled()) {
+                    log.debug("Username is successfully updated from " + userName + " to " + newUserName);
                 }
             } else {
-                super.doSetUserClaimValues(userName, claims, profileName);
+
+                String errorMessage =
+                        "Cannot rename user " + userName + " to " + newUserName + " as " + newUserName +
+                                " is already existing";
+
+                log.error(errorMessage);
+
+                throw new CustomUserStoreManagerException(
+                        CustomUserStoreConstants.USERNAME_ALREADY_EXISTING_ERROR_CODE, errorMessage);
             }
+        } else {
+            super.doSetUserClaimValues(userName, claims, profileName);
+        }
 
     }
 
